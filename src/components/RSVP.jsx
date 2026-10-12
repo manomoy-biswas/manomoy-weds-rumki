@@ -28,7 +28,7 @@ export default function RSVP() {
       <div className="max-w-md mx-auto text-center">
         <Reveal>
           <h2 className="text-3xl mb-1" style={{ color: C.maroonDeep }}>RSVP</h2>
-          <p className="text-base mb-8" style={{ color: `${C.brown}99` }}>Kindly confirm your presence for the Reception</p>
+          <p className="text-lg mb-8" style={{ color: `${C.brown}99` }}>Kindly confirm your presence for the Reception</p>
         </Reveal>
         <Reveal delay={0.1}>
           <FoilFrame>

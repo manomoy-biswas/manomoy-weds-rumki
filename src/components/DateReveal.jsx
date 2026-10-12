@@ -20,8 +20,8 @@ function HeartScratch({ label, value }) {
     const grad = ctx.createLinearGradient(0, 0, CANVAS_W, CANVAS_H);
     grad.addColorStop(0, C.goldLight); grad.addColorStop(0.5, C.gold); grad.addColorStop(1, C.goldLight);
     ctx.fillStyle = grad; ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-    ctx.fillStyle = C.maroonDeep; ctx.font = "600 18px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("scratch", CANVAS_W / 2, CANVAS_H / 2);
+    ctx.fillStyle = C.maroonDeep; ctx.font = "600 30px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("Scratch", CANVAS_W / 2, CANVAS_H / 2);
   }, []);
   const erase = (x, y) => {
     const ctx = canvasRef.current.getContext("2d");
@@ -76,7 +76,7 @@ export default function DateReveal() {
       </svg>
 
       <div className="relative z-10 max-w-2xl mx-auto">
-        <Reveal><p className="text-sm tracking-[0.25em] uppercase mb-1" style={{ color: C.gold }}>Save the Date</p></Reveal>
+        <Reveal><p className="text-lg tracking-[0.25em] uppercase mb-1" style={{ color: C.gold }}><b>Save the Date</b></p></Reveal>
         <Reveal delay={0.1}><p className="text-2xl sm:text-3xl mb-7 sm:mb-10" style={{ color: C.ivory }}>Scratch the hearts to reveal</p></Reveal>
         <div className="flex justify-center gap-5 sm:gap-8 md:gap-12 flex-wrap">
           <Reveal delay={0.15}><HeartScratch label="Day" value="25" /></Reveal>

@@ -5,7 +5,7 @@ import Kalka from "./common/Kalka";
 import { useReveal } from "./common/hooks";
 import {
   C, IMG_ICON_TRAY, IMG_BRIDE_BETEL2,
-  IMG_CEREMONY_SANGEET, IMG_CEREMONY_HALDI, IMG_CEREMONY_WEDDING, IMG_CEREMONY_RECEPTION,
+  IMG_CEREMONY_HALDI, IMG_CEREMONY_WEDDING, IMG_CEREMONY_RECEPTION,
 } from "./common/theme";
 
 /* ---------- Family / ceremony icons (small rail nodes) ---------- */
@@ -238,7 +238,6 @@ const MAP_URL_BANIJYA_BHABAN = "https://maps.app.goo.gl/GPjZbdu7w2tEP75f7";
 const MAP_URL_ABASHIKA_ANUSHTHAN_BHABAN = "https://maps.app.goo.gl/nBnKTB3TGBG4fVFb8";
 
 const ceremonies = [
-  { id: "sangeet", titleEn: "Sangeet Night", date: "24 November 2026", time: "7:00 PM onwards", venue: "Biswas Residence", venueDetail: "Purba Akhanagar, Kaliyaganj", mapUrl: MAP_URL_HOME, Icon: IconTopor, image: IMG_CEREMONY_SANGEET, revealType: "scratch" },
   { id: "holud", titleEn: "Gaye Holud", date: "25 November 2026", time: "10:00 AM onwards", venue: "Biswas Residence", venueDetail: "Purba Akhanagar, Kaliyaganj", mapUrl: MAP_URL_HOME, Icon: IconGachKouto, image: IMG_CEREMONY_HALDI, revealType: "tap" },
   { id: "wedding", titleEn: "Wedding Ceremony", date: "25 November 2026", time: "4:51 PM – 8:41 PM", venue: "Banijya Bhaban", venueDetail: "Raiganj", mapUrl: MAP_URL_BANIJYA_BHABAN, Icon: IconSwastik, image: IMG_CEREMONY_WEDDING, revealType: "hold" },
   { id: "reception", titleEn: "Reception", date: "27 November 2026", time: "8:00 PM onwards", venue: "Abashika Anushthan Bhaban", venueDetail: "Kaliyaganj", mapUrl: MAP_URL_ABASHIKA_ANUSHTHAN_BHABAN, Icon: IconMukut, image: IMG_CEREMONY_RECEPTION, revealType: "swipe" },
@@ -266,7 +265,7 @@ export default function ProgramRoadmap() {
       <div className="max-w-2xl md:max-w-4xl lg:max-w-6xl mx-auto">
         <Reveal>
           <h2 className="text-center text-3xl md:text-5xl lg:text-6xl mb-2 md:mb-4" style={{ color: C.maroonDeep }}>The Journey Ahead</h2>
-          <p className="text-center text-base md:text-lg mb-2" style={{ color: `${C.brown}99` }}>Tap each stop — every one reveals a different way</p>
+          <p className="text-center text-lg md:text-lg mb-2" style={{ color: `${C.brown}99` }}>Tap each stop — every one reveals a different way</p>
         </Reveal>
         <div className="mt-8 md:mt-14">
           {ceremonies.map((c, i) => (

@@ -23,7 +23,7 @@ export default function SendBlessings() {
         <Reveal>
           <img src={IMG_ICON_BETEL} alt="" className="w-16 h-16 object-contain mx-auto mb-2" />
           <h2 className="text-3xl mb-1" style={{ color: C.maroonDeep }}>Leave Us a Note</h2>
-          <p className="text-base mb-8" style={{ color: `${C.brown}99` }}>Share a wish or blessing for us</p>
+          <p className="text-lg mb-8" style={{ color: `${C.brown}99` }}>Share a wish or blessing for us</p>
         </Reveal>
         <Reveal delay={0.1}>
           <FoilFrame>

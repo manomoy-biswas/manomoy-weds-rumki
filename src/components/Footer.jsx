@@ -19,7 +19,7 @@ export default function Footer() {
         />
       </Reveal>
       <Reveal delay={0.1}>
-        <p className="text-lg" style={{ color: C.ivory }}>With love, Manomoy & Rumki</p>
+        <p className="text-xl" style={{ color: C.ivory }}>With love, Manomoy & Rumki</p>
       </Reveal>
     </footer>
   );
