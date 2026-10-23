@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MapPin } from "lucide-react";
 import Reveal from "./common/Reveal";
 import Kalka from "./common/Kalka";
-import { useReveal } from "./common/hooks";
+import { useReveal, useRevealOnce } from "./common/hooks";
 import {
   C, IMG_ICON_TRAY, IMG_BRIDE_BETEL2,
   IMG_CEREMONY_HALDI, IMG_CEREMONY_WEDDING, IMG_CEREMONY_RECEPTION,
@@ -31,7 +31,7 @@ function ShubhoDristi({ className = "" }) {
   );
 }
 
-/* ---------- Celebration burst — party-popper style, on reveal complete ---------- */
+/* ---------- Celebration burst — party-popper style, once a stop is revealed ---------- */
 function CelebrationBurst({ show }) {
   const particles = useMemo(() => {
     const emojis = ["🎉", "✨", "🎊", "🌸", "⭐"];
@@ -62,133 +62,17 @@ function CelebrationBurst({ show }) {
   );
 }
 
-/* ---------- Reveal widgets (used inside modal) ---------- */
-function ScratchReveal({ onComplete }) {
-  const canvasRef = useRef(null);
-  const drawing = useRef(false);
-  const done = useRef(false);
-  const W = 240, H = 110;
-  useEffect(() => {
-    const ctx = canvasRef.current.getContext("2d");
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, C.goldLight); grad.addColorStop(0.5, C.gold); grad.addColorStop(1, C.goldLight);
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = C.maroonDeep; ctx.font = "600 13px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("✦ Scratch to reveal ✦", W / 2, H / 2);
-  }, []);
-  const erase = (x, y) => {
-    if (done.current) return;
-    const ctx = canvasRef.current.getContext("2d");
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
-    const data = ctx.getImageData(0, 0, W, H).data;
-    let t = 0;
-    for (let i = 3; i < data.length; i += 30) if (data[i] === 0) t++;
-    if (t / (data.length / 30) > 0.45) { done.current = true; onComplete(); }
-  };
-  const getPos = (e) => { const r = canvasRef.current.getBoundingClientRect(); const p = e.touches ? e.touches[0] : e; return { x: p.clientX - r.left, y: p.clientY - r.top }; };
-  return (
-    <canvas ref={canvasRef} width={W} height={H} className="mx-auto rounded-md cursor-pointer touch-none block"
-      onMouseDown={(e) => { drawing.current = true; const { x, y } = getPos(e); erase(x, y); }}
-      onMouseMove={(e) => { if (drawing.current) { const { x, y } = getPos(e); erase(x, y); } }}
-      onMouseUp={() => (drawing.current = false)} onMouseLeave={() => (drawing.current = false)}
-      onTouchStart={(e) => { drawing.current = true; const { x, y } = getPos(e); erase(x, y); }}
-      onTouchMove={(e) => { if (drawing.current) { const { x, y } = getPos(e); erase(x, y); } }}
-      onTouchEnd={() => (drawing.current = false)} />
-  );
-}
-
-function TapReveal({ onComplete }) {
-  const [taps, setTaps] = useState(0);
-  const handleTap = () => {
-    if (taps >= 5) return;
-    const next = taps + 1;
-    setTaps(next);
-    if (next >= 5) setTimeout(onComplete, 300);
-  };
-  return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: `${C.gold}33` }}>
-        <div style={{ width: `${taps * 20}%`, height: "100%", background: C.gold, transition: "width 0.3s ease" }} />
-      </div>
-      <button onClick={handleTap} className="w-20 h-20 rounded-full text-sm font-medium" style={{ background: C.maroonDeep, color: C.goldLight, border: `2px solid ${C.gold}`, boxShadow: taps > 0 ? `0 0 ${taps * 6}px ${C.gold}88` : "none" }}>
-        Tap ({taps}/5)
-      </button>
-    </div>
-  );
-}
-
-function HoldReveal({ onComplete }) {
-  const [progress, setProgress] = useState(0);
-  const intervalRef = useRef(null);
-  const done = useRef(false);
-  const start = () => {
-    if (done.current) return;
-    intervalRef.current = setInterval(() => {
-      setProgress((p) => {
-        const next = Math.min(p + 4, 100);
-        if (next >= 100 && !done.current) { done.current = true; clearInterval(intervalRef.current); setTimeout(onComplete, 250); }
-        return next;
-      });
-    }, 60);
-  };
-  const stop = () => clearInterval(intervalRef.current);
-  useEffect(() => () => clearInterval(intervalRef.current), []);
-  return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: `${C.gold}33` }}>
-        <div style={{ width: `${progress}%`, height: "100%", background: C.gold, transition: "width 0.1s linear" }} />
-      </div>
-      <button onMouseDown={start} onMouseUp={stop} onMouseLeave={stop} onTouchStart={start} onTouchEnd={stop} className="w-24 h-24 rounded-full text-sm font-medium select-none" style={{ background: C.maroonDeep, color: C.goldLight, border: `2px solid ${C.gold}`, boxShadow: progress > 0 ? `0 0 ${progress / 3}px ${C.gold}88` : "none" }}>
-        Press &amp; Hold
-      </button>
-    </div>
-  );
-}
-
-function SwipeReveal({ onComplete }) {
-  const [val, setVal] = useState(0);
-  const done = useRef(false);
-  const handleChange = (e) => {
-    const v = Number(e.target.value);
-    setVal(v);
-    if (v >= 96 && !done.current) { done.current = true; setTimeout(onComplete, 200); }
-  };
-  return (
-    <div className="flex flex-col items-center gap-3 w-full">
-      <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: `${C.gold}33` }}>
-        <div style={{ width: `${val}%`, height: "100%", background: C.gold }} />
-      </div>
-      <input type="range" min="0" max="100" value={val} onChange={handleChange} className="w-full" style={{ accentColor: C.gold }} />
-      <p className="text-sm" style={{ color: `${C.brown}88` }}>Slide the ribbon all the way &rarr;</p>
-    </div>
-  );
-}
-
-/* ---------- Reveal modal ---------- */
-function RevealModal({ ceremony, onClose, onComplete }) {
-  const labels = { scratch: "Scratch to reveal", tap: "Tap 5 times to reveal", hold: "Press & hold to reveal", swipe: "Slide to reveal" };
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-6" style={{ background: `${C.maroonDeep}E6` }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-xs rounded-xl overflow-hidden" style={{ background: C.ivory, border: `1px solid ${C.gold}` }}>
-        <div className="w-full aspect-video overflow-hidden"><img src={ceremony.image} alt={ceremony.titleEn} className="w-full h-full object-cover" /></div>
-        <div className="p-5 text-center">
-          <p className="text-xl mb-1" style={{ color: C.maroonDeep, fontFamily: "'Cormorant Garamond', serif" }}>{ceremony.titleEn}</p>
-          <p className="text-sm mb-4 uppercase tracking-wide" style={{ color: `${C.brown}88` }}>{labels[ceremony.revealType]}</p>
-          {ceremony.revealType === "scratch" && <ScratchReveal onComplete={onComplete} />}
-          {ceremony.revealType === "tap" && <TapReveal onComplete={onComplete} />}
-          {ceremony.revealType === "hold" && <HoldReveal onComplete={onComplete} />}
-          {ceremony.revealType === "swipe" && <SwipeReveal onComplete={onComplete} />}
-          <button onClick={onClose} className="mt-5 text-sm uppercase tracking-wide" style={{ color: `${C.brown}77` }}>Close</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ---------- Journey timeline row ---------- */
-function TimelineRow({ ceremony, isLast, revealedFlag, justRevealed, onOpen }) {
+function TimelineRow({ ceremony, isLast }) {
   const [ref, visible] = useReveal(0.15);
+  const [detailsRef, revealed] = useRevealOnce(0.6);
+  const [celebrating, setCelebrating] = useState(false);
+  useEffect(() => {
+    if (!revealed) return;
+    const t1 = setTimeout(() => setCelebrating(true), 500);
+    const t2 = setTimeout(() => setCelebrating(false), 2400);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [revealed]);
   const Icon = ceremony.Icon;
   return (
     <div ref={ref} className="relative flex gap-4 sm:gap-6 md:gap-10">
@@ -206,13 +90,13 @@ function TimelineRow({ ceremony, isLast, revealedFlag, justRevealed, onOpen }) {
         <p className="text-xl md:text-4xl leading-none mb-3 md:mb-5" style={{ color: C.maroonDeep, fontFamily: "'Cormorant Garamond', serif" }}>{ceremony.titleEn}</p>
         <div className="rounded-lg overflow-hidden relative" style={{ boxShadow: `0 10px 24px -12px ${C.maroonDeep}99` }}>
           <div className="w-full aspect-video overflow-hidden"><img src={ceremony.image} alt={ceremony.titleEn} className="w-full h-full object-cover" /></div>
-          {!revealedFlag ? (
-            <button onClick={() => onOpen(ceremony)} className="w-full py-4 md:py-6 text-center text-base md:text-lg font-medium uppercase tracking-wide" style={{ background: C.gold, color: C.maroonDeep }}>
-              Tap to Reveal
-            </button>
-          ) : (
-            <div className="relative p-5 md:p-8" style={{ background: C.ivory, border: `1px solid ${C.gold}55`, borderTop: "none" }}>
-              <CelebrationBurst show={justRevealed} />
+          <div ref={detailsRef} className="relative overflow-hidden" style={{ background: C.ivory, border: `1px solid ${C.gold}55`, borderTop: "none" }}>
+            <div className="relative p-5 md:p-8" style={{
+              opacity: revealed ? 1 : 0,
+              transform: revealed ? "translateY(0)" : "translateY(14px)",
+              transition: "opacity 0.8s ease 0.45s, transform 0.8s cubic-bezier(.2,.7,.2,1) 0.45s",
+            }}>
+              <CelebrationBurst show={celebrating} />
               <span className="text-sm md:text-base tracking-widest uppercase" style={{ color: C.maroonDeep, fontFamily: "Marcellus, serif" }}>{ceremony.date}</span>
               <p className="text-base md:text-lg mt-1" style={{ color: C.brown }}>{ceremony.time}</p>
               <div className="flex items-start gap-1.5 md:gap-2 mt-2 md:mt-4">
@@ -226,7 +110,15 @@ function TimelineRow({ ceremony, isLast, revealedFlag, justRevealed, onOpen }) {
                 <MapPin size={14} /> View on Maps
               </a>
             </div>
-          )}
+            {/* gold ribbon covering the details, lifts away once the card scrolls into view */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-base md:text-lg font-medium uppercase tracking-wide" style={{
+              background: C.gold, color: C.maroonDeep,
+              transform: revealed ? "translateY(-100%)" : "translateY(0)",
+              transition: "transform 0.9s cubic-bezier(.6,0,.2,1) 0.15s",
+            }}>
+              ✦ ✦ ✦
+            </div>
+          </div>
         </div>
       </Reveal>
     </div>
@@ -238,26 +130,13 @@ const MAP_URL_BANIJYA_BHABAN = "https://maps.app.goo.gl/GPjZbdu7w2tEP75f7";
 const MAP_URL_ABASHIKA_ANUSHTHAN_BHABAN = "https://maps.app.goo.gl/nBnKTB3TGBG4fVFb8";
 
 const ceremonies = [
-  { id: "holud", titleEn: "Gaye Holud", date: "25 November 2026", time: "10:00 AM onwards", venue: "Biswas Residence", venueDetail: "Purba Akhanagar, Kaliyaganj", mapUrl: MAP_URL_HOME, Icon: IconGachKouto, image: IMG_CEREMONY_HALDI, revealType: "tap" },
-  { id: "wedding", titleEn: "Wedding Ceremony", date: "25 November 2026", time: "4:51 PM – 8:41 PM", venue: "Banijya Bhaban", venueDetail: "Raiganj", mapUrl: MAP_URL_BANIJYA_BHABAN, Icon: IconSwastik, image: IMG_CEREMONY_WEDDING, revealType: "hold" },
-  { id: "reception", titleEn: "Reception", date: "27 November 2026", time: "8:00 PM onwards", venue: "Abashika Anushthan Bhaban", venueDetail: "Kaliyaganj", mapUrl: MAP_URL_ABASHIKA_ANUSHTHAN_BHABAN, Icon: IconMukut, image: IMG_CEREMONY_RECEPTION, revealType: "swipe" },
+  { id: "holud", titleEn: "Gaye Holud", date: "25 November 2026", time: "10:00 AM onwards", venue: "Biswas Residence", venueDetail: "Purba Akhanagar, Kaliyaganj", mapUrl: MAP_URL_HOME, Icon: IconGachKouto, image: IMG_CEREMONY_HALDI },
+  { id: "wedding", titleEn: "Wedding Ceremony", date: "25 November 2026", time: "4:51 PM – 8:41 PM", venue: "Banijya Bhaban", venueDetail: "Raiganj", mapUrl: MAP_URL_BANIJYA_BHABAN, Icon: IconSwastik, image: IMG_CEREMONY_WEDDING },
+  { id: "reception", titleEn: "Reception", date: "27 November 2026", time: "8:00 PM onwards", venue: "Abashika Anushthan Bhaban", venueDetail: "Kaliyaganj", mapUrl: MAP_URL_ABASHIKA_ANUSHTHAN_BHABAN, Icon: IconMukut, image: IMG_CEREMONY_RECEPTION },
 ];
 
 /* ---------- Program roadmap / journey section ---------- */
 export default function ProgramRoadmap() {
-  const [revealedMap, setRevealedMap] = useState({});
-  const [activeCeremony, setActiveCeremony] = useState(null);
-  const [justRevealed, setJustRevealed] = useState(null);
-
-  const openModal = (c) => setActiveCeremony(c);
-  const closeModal = () => setActiveCeremony(null);
-  const completeReveal = (id) => {
-    setRevealedMap((r) => ({ ...r, [id]: true }));
-    setJustRevealed(id);
-    setTimeout(() => setActiveCeremony(null), 600);
-    setTimeout(() => setJustRevealed(null), 1900);
-  };
-
   return (
     <section className="relative px-6 py-16 md:py-24 overflow-hidden" style={{ background: `linear-gradient(180deg, ${C.goldPale} 0%, ${C.ivory} 15%, ${C.ivory} 85%, ${C.goldPale} 100%)` }}>
       <Kalka className="absolute top-4 left-2 w-7 h-10 opacity-70" />
@@ -265,15 +144,14 @@ export default function ProgramRoadmap() {
       <div className="max-w-2xl md:max-w-4xl lg:max-w-6xl mx-auto">
         <Reveal>
           <h2 className="text-center text-3xl md:text-5xl lg:text-6xl mb-2 md:mb-4" style={{ color: C.maroonDeep }}>The Journey Ahead</h2>
-          <p className="text-center text-lg md:text-lg mb-2" style={{ color: `${C.brown}99` }}>Tap each stop — every one reveals a different way</p>
+          <p className="text-center text-lg md:text-lg mb-2" style={{ color: `${C.brown}99` }}>Scroll along — each stop reveals itself as you arrive</p>
         </Reveal>
         <div className="mt-8 md:mt-14">
           {ceremonies.map((c, i) => (
-            <TimelineRow key={c.id} ceremony={c} isLast={i === ceremonies.length - 1} revealedFlag={!!revealedMap[c.id]} justRevealed={justRevealed === c.id} onOpen={openModal} />
+            <TimelineRow key={c.id} ceremony={c} isLast={i === ceremonies.length - 1} />
           ))}
         </div>
       </div>
-      {activeCeremony && <RevealModal ceremony={activeCeremony} onClose={closeModal} onComplete={() => completeReveal(activeCeremony.id)} />}
     </section>
   );
 }

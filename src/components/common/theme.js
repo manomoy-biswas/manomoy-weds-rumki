@@ -13,7 +13,7 @@ export const C = {
 
 export const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Marcellus&family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Parisienne&display=swap');`;
 
-/* Prefix public-directory paths with Vite's base (e.g. "/wedding-invitation/" on GitHub Pages) */
+/* Prefix public-directory paths with Vite's base (e.g. "/wedding-invitation-scroll/" on GitHub Pages) */
 const asset = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
 
 /* Add your own music file path here (e.g. "/audio/shehnai.mp3") to enable sound on open */
