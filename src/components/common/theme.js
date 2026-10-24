@@ -27,7 +27,7 @@ export const IMG_CEREMONY_RECEPTION = asset("/images/reception.png");
 
 /* Uploaded artwork: cover, textures, icons */
 export const IMG_COVER = asset("/images/cover.png");
-export const IMG_BANNER = asset("/images/top_banner.jpeg");
+export const IMG_BANNER = asset("/images/top_banner.png");
 export const IMG_DAMASK = asset("/images/damask.png");
 export const IMG_MANDALA = asset("/images/mandala.png");
 export const IMG_ICON_CROWNS = asset("/images/icon_crowns.png");

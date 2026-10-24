@@ -26,49 +26,41 @@ function playOnce(ctx, masterGain, buffer) {
   source.start(startAt, 0, PLAY_SECONDS);
 }
 
-/* ---------- Background music: browsers only allow audio after a user gesture,
-   so playback starts on the first tap / click / key press anywhere on the page ---------- */
-const START_EVENTS = ["pointerdown", "touchend", "keydown"];
-
-export default function AudioPlayer() {
+/* ---------- Background music: plays once the envelope opens, mute toggle while open ---------- */
+export default function AudioPlayer({ phase }) {
   const [muted, setMuted] = useState(false);
   const ctxRef = useRef(null);
   const masterGainRef = useRef(null);
   const startedRef = useRef(false);
 
   useEffect(() => {
-    if (!AUDIO_SRC) return;
-    const start = () => {
-      START_EVENTS.forEach((ev) => window.removeEventListener(ev, start));
-      if (startedRef.current) return;
-      startedRef.current = true;
-
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-
-      const ctx = new AudioContextClass();
-      ctxRef.current = ctx;
-
-      const masterGain = ctx.createGain();
-      masterGain.gain.value = TARGET_VOLUME;
-      masterGain.connect(ctx.destination);
-      masterGainRef.current = masterGain;
-
-      fetch(AUDIO_SRC)
-        .then((res) => res.arrayBuffer())
-        .then((data) => ctx.decodeAudioData(data))
-        .then((buffer) => {
-          if (ctx.state === "suspended") ctx.resume();
-          playOnce(ctx, masterGain, buffer);
-        })
-        .catch(() => {});
-    };
-    START_EVENTS.forEach((ev) => window.addEventListener(ev, start));
-    return () => {
-      START_EVENTS.forEach((ev) => window.removeEventListener(ev, start));
-      ctxRef.current?.close();
-    };
+    return () => { ctxRef.current?.close(); };
   }, []);
+
+  useEffect(() => {
+    if (phase !== "opening" || startedRef.current || !AUDIO_SRC) return;
+    startedRef.current = true;
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const ctx = new AudioContextClass();
+    ctxRef.current = ctx;
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = TARGET_VOLUME;
+    masterGain.connect(ctx.destination);
+    masterGainRef.current = masterGain;
+
+    fetch(AUDIO_SRC)
+      .then((res) => res.arrayBuffer())
+      .then((data) => ctx.decodeAudioData(data))
+      .then((buffer) => {
+        if (ctx.state === "suspended") ctx.resume();
+        playOnce(ctx, masterGain, buffer);
+      })
+      .catch(() => {});
+  }, [phase]);
 
   if (!AUDIO_SRC) return null;
 
@@ -82,8 +74,10 @@ export default function AudioPlayer() {
   };
 
   return (
-    <button onClick={toggleMute} className="fixed bottom-5 right-5 z-40 w-11 h-11 rounded-full flex items-center justify-center" style={{ background: C.maroonDeep, border: `1px solid ${C.gold}` }}>
-      {muted ? <VolumeX size={18} color={C.gold} /> : <Volume2 size={18} color={C.gold} />}
-    </button>
+    phase === "open" && (
+      <button onClick={toggleMute} className="fixed bottom-5 right-5 z-40 w-11 h-11 rounded-full flex items-center justify-center" style={{ background: C.maroonDeep, border: `1px solid ${C.gold}` }}>
+        {muted ? <VolumeX size={18} color={C.gold} /> : <Volume2 size={18} color={C.gold} />}
+      </button>
+    )
   );
 }
