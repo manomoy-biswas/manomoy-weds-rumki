@@ -2,20 +2,14 @@ import { useState } from "react";
 import Reveal from "./common/Reveal";
 import { C, IMG_CHIBI_PORTRAIT, IMG_CHIBI_FIRE } from "./common/theme";
 
-/* ---------- Guess card: tap to reveal (or hide) the answer ---------- */
+/* ---------- Guess flip card ---------- */
 function GuessCard({ question }) {
-  const [revealed, setRevealed] = useState(false);
+  const [flipped, setFlipped] = useState(false);
   return (
-    <div onClick={() => setRevealed((r) => !r)} className="relative cursor-pointer select-none rounded-lg p-4 text-center flex flex-col items-center justify-center" style={{ background: C.maroonDeep, border: `1px solid ${C.gold}55`, minHeight: 110 }}>
-      <p className="text-2xl mb-2" style={{ color: C.gold, fontFamily: "Marcellus, serif" }}>M or R?</p>
-      <p className="text-xl" style={{ color: `${C.ivory}CC` }}>{question}</p>
-      <p className="text-xl italic mt-2" style={{
-        color: C.goldLight,
-        opacity: revealed ? 1 : 0,
-        transform: revealed ? "translateY(0)" : "translateY(8px)",
-        transition: "opacity 0.6s ease, transform 0.6s ease",
-      }}>Ask us at the wedding 😉</p>
-      {!revealed && <p className="absolute bottom-2 inset-x-0 text-sm" style={{ color: `${C.gold}AA` }}>Tap to reveal</p>}
+    <div onClick={() => setFlipped((f) => !f)} className="cursor-pointer rounded-lg p-4 text-center flex flex-col items-center justify-center" style={{ background: C.maroonDeep, border: `1px solid ${C.gold}55`, minHeight: 110 }}>
+      {!flipped ? (
+        <><p className="text-2xl mb-2" style={{ color: C.gold, fontFamily: "Marcellus, serif" }}>M or R?</p><p className="text-xl" style={{ color: `${C.ivory}CC` }}>{question}</p></>
+      ) : (<p className="text-xl italic" style={{ color: C.goldLight }}>Ask us at the wedding 😉</p>)}
     </div>
   );
 }
